@@ -16,7 +16,7 @@ class DesktopWindow: NSWindow {
             defer: false
         )
 
-        self.level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.desktopWindow)))
+        self.level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.desktopWindow)) + 1)
         self.collectionBehavior = [.canJoinAllSpaces, .stationary, .ignoresCycle]
         self.isOpaque = false
         self.backgroundColor = .clear
@@ -24,6 +24,7 @@ class DesktopWindow: NSWindow {
         self.ignoresMouseEvents = false
         self.isMovableByWindowBackground = false
         self.isReleasedWhenClosed = false
+        self.acceptsMouseMovedEvents = true
 
         let hostView = NSHostingView(rootView: contentView)
         hostView.frame = self.frame
@@ -59,7 +60,10 @@ class DesktopWindow: NSWindow {
     }
 
     override func rightMouseDown(with event: NSEvent) {
-        guard let delegate = contextMenuDelegate else { return }
+        guard let delegate = contextMenuDelegate else {
+            super.rightMouseDown(with: event)
+            return
+        }
         let menu = NSMenu()
         for item in delegate.contextMenuItems() {
             menu.addItem(item)
@@ -67,13 +71,12 @@ class DesktopWindow: NSWindow {
         NSMenu.popUpContextMenu(menu, with: event, for: self.contentView!)
     }
 
-    // Option+Click to drag
+    // Click to drag (no modifier needed)
     override func mouseDown(with event: NSEvent) {
-        if event.modifierFlags.contains(.option) {
-            self.performDrag(with: event)
-        }
+        self.performDrag(with: event)
     }
 
-    override var canBecomeKey: Bool { false }
+    // Desktop windows need to accept mouse events
+    override var canBecomeKey: Bool { true }
     override var canBecomeMain: Bool { false }
 }

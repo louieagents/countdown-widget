@@ -6,13 +6,55 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var countdownManager = CountdownManager()
     private var datePickerWindow: NSWindow?
     private var datePicker: NSDatePicker?
+    private var statusItem: NSStatusItem?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        setupMenuBar()
+
         if countdownManager.startDate == nil {
             showDatePicker()
         } else {
             showDesktopWidget()
         }
+    }
+
+    private func setupMenuBar() {
+        statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
+        if let button = statusItem?.button {
+            button.title = "🔴"
+        }
+
+        let menu = NSMenu()
+
+        let dayItem = NSMenuItem(title: dayString(), action: nil, keyEquivalent: "")
+        dayItem.isEnabled = false
+        dayItem.tag = 999
+        menu.addItem(dayItem)
+
+        menu.addItem(.separator())
+
+        let setDate = NSMenuItem(title: "Set Start Date…", action: #selector(setStartDate), keyEquivalent: "")
+        setDate.target = self
+        menu.addItem(setDate)
+
+        let reset = NSMenuItem(title: "Reset", action: #selector(resetCountdown), keyEquivalent: "")
+        reset.target = self
+        menu.addItem(reset)
+
+        menu.addItem(.separator())
+
+        let quit = NSMenuItem(title: "Quit", action: #selector(quitApp), keyEquivalent: "q")
+        quit.target = self
+        menu.addItem(quit)
+
+        statusItem?.menu = menu
+    }
+
+    private func dayString() -> String {
+        let day = countdownManager.currentDay
+        if day <= 0 { return "Starts soon" }
+        if day > 100 { return "✅ Completed!" }
+        return "Day \(day) of 100"
     }
 
     private func showDatePicker() {
@@ -72,10 +114,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     private func showDesktopWidget() {
         NSApp.setActivationPolicy(.accessory)
+        desktopWindow?.close()
         let contentView = ContentView(manager: countdownManager)
         let window = DesktopWindow(contentView: contentView)
         window.makeContextMenu(delegate: self)
         desktopWindow = window
+
+        // Update menubar day count
+        if let menu = statusItem?.menu, let dayItem = menu.item(withTag: 999) {
+            dayItem.title = dayString()
+        }
     }
 
     @objc private func setStartDate() {
