@@ -41,57 +41,8 @@ def generate_wallpaper(output_path=None):
     
     start_x = (WIDTH - grid_width) // 2
     
-    # Load fonts early for text measurement
-    try:
-        title_font = ImageFont.truetype("/System/Library/Fonts/SFCompact.ttf", 48)
-        sub_font = ImageFont.truetype("/System/Library/Fonts/SFCompact.ttf", 24)
-    except:
-        try:
-            title_font = ImageFont.truetype("/System/Library/Fonts/Helvetica.ttc", 48)
-            sub_font = ImageFont.truetype("/System/Library/Fonts/Helvetica.ttc", 24)
-        except:
-            title_font = ImageFont.load_default()
-            sub_font = ImageFont.load_default()
-    
-    # Day label
-    if current_day <= 0:
-        day_text = "STARTS SOON"
-    elif current_day > TOTAL_DAYS:
-        day_text = "✅ COMPLETED"
-    else:
-        day_text = f"DAY {current_day} OF {TOTAL_DAYS}"
-    
-    end_text = f"Ends {end_date.strftime('%B %d, %Y')}"
-    
-    # Header height: title + end date + progress bar + spacing
-    header_height = 48 + 15 + 24 + 20 + 6 + 40  # title + gap + subtitle + gap + bar + gap before grid
-    
-    # Position everything: header + grid centered together
-    total_height = header_height + grid_height
-    top_y = (HEIGHT - total_height) // 2 + 100
-    
-    # Draw header text ABOVE grid
-    bbox = draw.textbbox((0, 0), day_text, font=title_font)
-    tw = bbox[2] - bbox[0]
-    draw.text(((WIDTH - tw) // 2, top_y), day_text, fill=TEXT_WHITE, font=title_font)
-    
-    bbox = draw.textbbox((0, 0), end_text, font=sub_font)
-    tw = bbox[2] - bbox[0]
-    draw.text(((WIDTH - tw) // 2, top_y + 48 + 15), end_text, fill=(255, 255, 255, 100), font=sub_font)
-    
-    # Progress bar
-    bar_y = top_y + 48 + 15 + 24 + 20
-    bar_width = grid_width
-    bar_height = 6
-    bar_x = start_x
-    draw.rounded_rectangle([bar_x, bar_y, bar_x + bar_width, bar_y + bar_height], radius=3, fill=(26, 26, 26))
-    pct = min(current_day / TOTAL_DAYS, 1.0)
-    fill_width = int(bar_width * pct)
-    if fill_width > 0:
-        draw.rounded_rectangle([bar_x, bar_y, bar_x + fill_width, bar_y + bar_height], radius=3, fill=RED)
-    
-    # Grid starts below header
-    start_y = bar_y + 6 + 40
+    # Grid only — no text header (lock screen widgets cover that area)
+    start_y = (HEIGHT - grid_height) // 2 + 150
     
     # Draw grid
     for i in range(TOTAL_DAYS):
