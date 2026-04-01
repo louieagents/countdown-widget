@@ -42,7 +42,7 @@ def generate_wallpaper(output_path=None):
     start_x = (WIDTH - grid_width) // 2
     
     # Grid only — no text header (lock screen widgets cover that area)
-    start_y = (HEIGHT - grid_height) // 2 + 150
+    start_y = (HEIGHT - grid_height) // 2 + 250
     
     # Draw grid
     for i in range(TOTAL_DAYS):
