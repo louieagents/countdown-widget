@@ -71,6 +71,22 @@ def generate_wallpaper(output_path=None):
         ly = y + (square_size - th) // 2
         draw.text((lx, ly), label, fill=(255, 255, 255, 120), font=row_font)
     
+    # Draw day-of-week headers above the grid
+    dow_labels = ["M", "T", "W", "T", "F", "S", "S"]
+    try:
+        header_font = ImageFont.truetype("/System/Library/Fonts/SFCompact.ttf", 20)
+    except:
+        try:
+            header_font = ImageFont.truetype("/System/Library/Fonts/Helvetica.ttc", 20)
+        except:
+            header_font = ImageFont.load_default()
+    
+    for c, label in enumerate(dow_labels):
+        hx = start_x + c * (square_size + gap)
+        bbox = draw.textbbox((0, 0), label, font=header_font)
+        tw = bbox[2] - bbox[0]
+        draw.text((hx + (square_size - tw) // 2, start_y - 30), label, fill=(255, 255, 255, 80), font=header_font)
+    
     # Draw grid
     for i in range(TOTAL_DAYS):
         row = i // GRID_COLS
@@ -109,26 +125,43 @@ def generate_wallpaper(output_path=None):
             # Remaining - outline only
             draw.rounded_rectangle([x, y, x + square_size, y + square_size], radius=8, outline=OUTLINE, width=2)
         
-        # Day number
+        # Day number (centered)
         try:
             font = ImageFont.truetype("/System/Library/Fonts/SFCompact.ttf", 24)
+            tiny_font = ImageFont.truetype("/System/Library/Fonts/SFCompact.ttf", 12)
         except:
             try:
                 font = ImageFont.truetype("/System/Library/Fonts/Helvetica.ttc", 24)
+                tiny_font = ImageFont.truetype("/System/Library/Fonts/Helvetica.ttc", 12)
             except:
                 font = ImageFont.load_default()
+                tiny_font = ImageFont.load_default()
         
         text = str(day)
         bbox = draw.textbbox((0, 0), text, font=font)
         tw = bbox[2] - bbox[0]
         th = bbox[3] - bbox[1]
         tx = x + (square_size - tw) // 2
-        ty = y + (square_size - th) // 2
+        ty = y + (square_size - th) // 2 - 8  # shift up to make room for date
         
         if day < current_day or day == current_day:
             draw.text((tx, ty), text, fill=(255, 255, 255, 220), font=font)
         else:
             draw.text((tx, ty), text, fill=(255, 255, 255, 60), font=font)
+        
+        # Date label (e.g. "Apr 6") at bottom of box
+        actual_date = START_DATE + timedelta(days=i)
+        date_str = actual_date.strftime("%b %-d")
+        
+        bbox2 = draw.textbbox((0, 0), date_str, font=tiny_font)
+        tw2 = bbox2[2] - bbox2[0]
+        tx2 = x + (square_size - tw2) // 2
+        ty2 = y + square_size - 18
+        
+        if day < current_day or day == current_day:
+            draw.text((tx2, ty2), date_str, fill=(255, 255, 255, 100), font=tiny_font)
+        else:
+            draw.text((tx2, ty2), date_str, fill=(255, 255, 255, 40), font=tiny_font)
     
     if output_path is None:
         output_path = os.path.expanduser("~/.openclaw/workspace/countdown-wallpaper.png")
