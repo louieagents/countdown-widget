@@ -27,7 +27,7 @@ TEXT_WHITE = (255, 255, 255)
 
 # Special days
 YELLOW_DAYS = {22, 23, 24, 44, 45}  # Important dates coming up
-GREEN_DAYS = {41, 56}                # Milestones
+GREEN_DAYS = {40, 54}                # Milestones
 
 def generate_wallpaper(output_path=None):
     today = date.today()
